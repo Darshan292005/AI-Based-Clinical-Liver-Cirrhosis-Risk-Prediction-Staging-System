@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CirrhosisAI | Clinical Decision Support System</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #60a5fa;
+            --primary-subtle: #eff6ff;
+            --accent: #0284c7;
+            --bg-page: #f8fafc;
+            --card-bg: #ffffff;
+            --text-heading: #0f172a;
+            --text-body: #334155;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --border-focus: #3b82f6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 10px 25px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.03);
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-body);
+            line-height: 1.5;
+            min-height: 100vh;
+            padding: 2.5rem 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .main-container {
+            max-width: 1040px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Top Header Card */
+        .app-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .brand-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            letter-spacing: 0.02em;
+            border: 1px solid #bae6fd;
+        }
+
+        .app-title {
+            font-size: 2.3rem;
+            font-weight: 800;
+            color: var(--text-heading);
+            letter-spacing: -0.025em;
+            margin-bottom: 0.5rem;
+        }
+
+        .app-title span {
+            background: linear-gradient(135deg, #2563eb, #0284c7);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .app-subtitle {
+            font-size: 1.05rem;
+            color: var(--text-muted);
+            max-width: 640px;
+            margin: 0 auto;
+        }
+
+        /* Quick Pre-fill / Preset Bar */
+        .preset-bar {
+            background: #ffffff;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .preset-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .preset-chips {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .preset-btn {
+            background: #f1f5f9;
+            color: var(--text-body);
+            border: 1px solid var(--border);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-family: inherit;
+        }
+
+        .preset-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .preset-btn.stage1:hover { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+        .preset-btn.stage2:hover { background: #fffbeb; color: #b45309; border-color: #fde68a; }
+        .preset-btn.stage4:hover { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
+        .preset-btn.reset:hover { background: #f8fafc; color: #475569; }
+
+        /* Form Card */
+        .form-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 2.25rem;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 1.75rem;
+            margin-bottom: 1.25rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .section-header:first-of-type {
+            margin-top: 0;
+        }
+
+        .section-badge {
+            background: var(--primary-subtle);
+            color: var(--primary);
+            font-size: 0.8rem;
+            font-weight: 700;
+            width: 26px;
+            height: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+        }
+
+        .section-header h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-heading);
+        }
+
+        .section-header p {
+            margin-left: auto;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .input-label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+        }
+
+        label {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text-heading);
+        }
+
+        .ref-badge {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            background: #f1f5f9;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        input[type="number"], select {
+            background: #ffffff;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 0.95rem;
+            color: var(--text-heading);
+            font-family: inherit;
+            transition: all 0.2s ease;
+            outline: none;
+            width: 100%;
+        }
+
+        input[type="number"]:focus, select:focus {
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        input::placeholder {
+            color: #94a3b8;
+            font-size: 0.88rem;
+        }
+
+        /* File Upload Box */
+        .upload-card {
+            border: 1.5px dashed var(--border);
+            border-radius: 10px;
+            padding: 14px;
+            text-align: center;
+            background: #f8fafc;
+            transition: all 0.2s ease;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .upload-card:hover {
+            border-color: var(--primary-light);
+            background: #f0f7ff;
+        }
+
+        .upload-card input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            cursor: pointer;
+            width: 100%;
+            height: 100%;
+        }
+
+        .upload-icon {
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+
+        .upload-label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-heading);
+            display: block;
+        }
+
+        .upload-hint {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            display: block;
+        }
+
+        .file-selected-text {
+            font-size: 0.78rem;
+            color: var(--primary-dark);
+            font-weight: 600;
+            margin-top: 4px;
+            display: none;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Submit Action */
+        .submit-section {
+            margin-top: 2.25rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #ffffff;
+            border: none;
+            width: 100%;
+            padding: 15px 24px;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-family: inherit;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 22px rgba(37, 99, 235, 0.45);
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .btn-submit:disabled {
+            opacity: 0.75;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .spinner {
+            display: none;
+            width: 20px;
+            height: 20px;
+            border: 2.5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #ffffff;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .footer-note {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        @media (max-width: 640px) {
+            body { padding: 1rem 0.5rem; }
+            .form-card { padding: 1.25rem; }
+            .app-title { font-size: 1.8rem; }
+            .preset-bar { flex-direction: column; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        
+        <!-- App Header -->
+        <header class="app-header">
+            <div class="brand-badge">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                </svg>
+                CLINICAL DECISION SUPPORT SYSTEM
+            </div>
+            <h1 class="app-title">Cirrhosis<span>AI</span> Staging Engine</h1>
+            <p class="app-subtitle">Multi-biomarker machine learning classifier for accurate liver cirrhosis stage diagnosis (Stage 1 to 4) & risk prognosis.</p>
+        </header>
+
+        <!-- Fast Test Demo Presets -->
+        <div class="preset-bar">
+            <div class="preset-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                </svg>
+                Quick Demo Presets:
+            </div>
+            <div class="preset-chips">
+                <button type="button" class="preset-btn stage1" onclick="loadPreset('stage1')">
+                    🟢 Normal / Stage 1
+                </button>
+                <button type="button" class="preset-btn stage2" onclick="loadPreset('stage2')">
+                    🟡 Moderate / Stage 2-3
+                </button>
+                <button type="button" class="preset-btn stage4" onclick="loadPreset('stage4')">
+                    🔴 Critical / Stage 4
+                </button>
+                <button type="button" class="preset-btn reset" onclick="resetForm()">
+                    🔄 Reset
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Form Card -->
+        <div class="form-card">
+            <form id="prediction-form">
+                
+                <!-- Section 1: Demographics & Clinical Signs -->
+                <div class="section-header">
+                    <div class="section-badge">1</div>
+                    <h3>Demographics & Primary Clinical Signs</h3>
+                    <p>Core Physical Indicators</p>
+                </div>
+
+                <div class="form-grid">
+                    <div class="input-group">
+                        <div class="input-label-row">
+                            <label for="input-age">Age (Years) *</label>
+                            <span class="ref-badge">18 - 85 yrs</span>
+                        </div>
+                        <input type="number" id="input-age" name="Age" required min="1" max="120" placeholder="e.g. 52">
+                    </div>
+
+                    <div class="input-group">
+                        <div class="input-label-row">
+                            <label for="input-sex">Biological Sex *</label>
+                        </div>
+                        <select id="input-sex" name="Sex" required>
+                            <option value="M">Male (M)</option>
+                            <option value="F">Female (F)</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <div class="input-label-row">
+                            <label for="input-ascites">Ascites *</label>
+                            <span class="ref-badge">Abdominal Fluid</span>
+                        </div>
+                        <select id="input-ascites" name="Ascites" required>
+                            <option value="N">No (Absent)</option>
+                            <option value="Y">Yes (Present)</option>
+                        </select>
+                    </div>
+
+                    <div class="input-group">
+                        <div class="input-label-row">
+                            <label for="input-hepatomegaly">Hepatomegaly *</label>
+                            <span class="ref-badge">Enlarged Liver</span>
+                        </div>
+                        <select id="input-hepatomegaly" name="Hepatomegaly" required>
+                            <option value="N">No / Normal</option>
+                            <option value="Y">Yes (Enlarged)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Section 2: Quantitative Biochemical Biomarkers -->
+                <div class="section-header">
+                    <div class="section-badge">2</div>
+                    <h3>Serum Biomarkers & Hematology</h3>
+                    <p>Clinical Laboratory Values</p>
+                </div>
+
+                <div class="form-grid">
+                    <div class="input-group">
+                        <div class="input-label-row">
+                            <label for="input-bilirubin">Serum Bilirubin (mg/dL)</label>
+                            <span class="ref-badge">Normal: 0.2 – 1.2</span>
+                        </div>
+                        <input type="number" step="0.1" id="input-bilirubin" name="Bilirubin" placeholder="e.g. 1.2">
+                    </div>
+
+                    <div class="input-group">
+                        <div class="input-label-row">
+                            <label for="input-albumin">Serum Albumin (g/dL)</label>
+                            <span class="ref-badge">Normal: 3.5 – 5.0</span>
+                        </div>
+                        <input type="number" step="0.1" id="input-albumin" name="Albumin" placeholder="e.g. 3.8">
+                    </div>
+
+                    <div class="input-group">
+                        <div class="input-label-row">
+                            <label for="input-platelets">Platelet Count (cc/1000)</label>
+                            <span class="ref-badge">Normal: 150 – 450</span>
+                        </div>
+                        <input type="number" step="1" id="input-platelets" name="Platelets" placeholder="e.g. 240">
+                    </div>
+
+                    <div class="input-group">
+                        <div class="input-label-row">
+                            <label for="input-sgot">SGOT / AST (U/L)</label>
+                            <span class="ref-badge">Normal: 10 – 40</span>
+                        </div>
+                        <input type="number" step="0.1" id="input-sgot" name="SGOT" placeholder="e.g. 38.0">
+                    </div>
+
+                    <div class="input-group">
+                        <div class="input-label-row">
+                            <label for="input-prothrombin">Prothrombin Time (s)</label>
+                            <span class="ref-badge">Normal: 11.0 – 13.5</span>
+                        </div>
+                        <input type="number" step="0.1" id="input-prothrombin" name="Prothrombin Time" placeholder="e.g. 11.4">
+                    </div>
+
+                    <div class="input-group">
+                        <div class="input-label-row">
+                            <label for="input-edema">Peripheral Edema</label>
+                            <span class="ref-badge">Swelling</span>
+                        </div>
+                        <select id="input-edema" name="Edema">
+                            <option value="N">No Edema (N)</option>
+                            <option value="S">Resolved with Diuretics (S)</option>
+                            <option value="Y">Edema Present (Y)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Section 3: Diagnostic Imaging Reports -->
+                <div class="section-header">
+                    <div class="section-badge">3</div>
+                    <h3>Supplemental Imaging Files</h3>
+                    <p>Optional Modalities</p>
+                </div>
+
+                <div class="form-grid">
+                    <div class="upload-card">
+                        <input type="file" id="ct-file" name="ct_image" accept="image/*" onchange="updateFileName(this, 'ct-name')">
+                        <svg class="upload-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect width="18" height="18" x="3" y="3" rx="2" ry="2"/>
+                            <circle cx="9" cy="9" r="2"/>
+                            <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                        </svg>
+                        <span class="upload-label">CT Scan</span>
+                        <span class="upload-hint">Upload DICOM / Image</span>
+                        <span class="file-selected-text" id="ct-name"></span>
+                    </div>
+
+                    <div class="upload-card">
+                        <input type="file" id="mri-file" name="mri_image" accept="image/*" onchange="updateFileName(this, 'mri-name')">
+                        <svg class="upload-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                            <path d="M3 3v5h5"/>
+                            <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/>
+                            <path d="M16 21h5v-5"/>
+                        </svg>
+                        <span class="upload-label">MRI Scan</span>
+                        <span class="upload-hint">Upload DICOM / Image</span>
+                        <span class="file-selected-text" id="mri-name"></span>
+                    </div>
+
+                    <div class="upload-card">
+                        <input type="file" id="us-file" name="ultrasound_image" accept="image/*" onchange="updateFileName(this, 'us-name')">
+                        <svg class="upload-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M2 12h5l3 5 4-10 3 5h5"/>
+                        </svg>
+                        <span class="upload-label">Ultrasound</span>
+                        <span class="upload-hint">Hepatic Sonogram</span>
+                        <span class="file-selected-text" id="us-name"></span>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="submit-section">
+                    <button type="submit" id="submit-btn" class="btn-submit">
+                        <div class="spinner" id="btn-spinner"></div>
+                        <span id="btn-text">Compute AI Staging Assessment</span>
+                        <svg id="btn-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M5 12h14"/>
+                            <path d="m12 5 7 7-7 7"/>
+                        </svg>
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <p class="footer-note">
+            AI-based prediction validated on PBC clinical cohort with SMOTE class rebalancing. For medical decision support assistance only.
+        </p>
+    </div>
+
+    <script>
+        // Preset Data Profiles
+        const presets = {
+            stage1: {
+                Age: 44,
+                Sex: 'F',
+                Ascites: 'N',
+                Hepatomegaly: 'N',
+                Bilirubin: 0.7,
+                Albumin: 4.1,
+                Platelets: 285,
+                SGOT: 32.0,
+                'Prothrombin Time': 10.6,
+                Edema: 'N'
+            },
+            stage2: {
+                Age: 51,
+                Sex: 'M',
+                Ascites: 'N',
+                Hepatomegaly: 'Y',
+                Bilirubin: 2.3,
+                Albumin: 3.4,
+                Platelets: 165,
+                SGOT: 78.4,
+                'Prothrombin Time': 12.2,
+                Edema: 'S'
+            },
+            stage4: {
+                Age: 55,
+                Sex: 'F',
+                Ascites: 'Y',
+                Hepatomegaly: 'Y',
+                Bilirubin: 14.5,
+                Albumin: 2.6,
+                Platelets: 95,
+                SGOT: 130.5,
+                'Prothrombin Time': 14.8,
+                Edema: 'Y'
+            }
+        };
+
+        function loadPreset(key) {
+            const data = presets[key];
+            if (!data) return;
+
+            document.getElementById('input-age').value = data.Age;
+            document.getElementById('input-sex').value = data.Sex;
+            document.getElementById('input-ascites').value = data.Ascites;
+            document.getElementById('input-hepatomegaly').value = data.Hepatomegaly;
+            document.getElementById('input-bilirubin').value = data.Bilirubin;
+            document.getElementById('input-albumin').value = data.Albumin;
+            document.getElementById('input-platelets').value = data.Platelets;
+            document.getElementById('input-sgot').value = data.SGOT;
+            document.getElementById('input-prothrombin').value = data['Prothrombin Time'];
+            document.getElementById('input-edema').value = data.Edema;
+        }
+
+        function resetForm() {
+            document.getElementById('prediction-form').reset();
+            ['ct-name', 'mri-name', 'us-name'].forEach(id => {
+                const el = document.getElementById(id);
+                el.style.display = 'none';
+                el.textContent = '';
+            });
+        }
+
+        function updateFileName(input, targetId) {
+            const displayEl = document.getElementById(targetId);
+            if (input.files && input.files.length > 0) {
+                displayEl.textContent = 'Selected: ' + input.files[0].name;
+                displayEl.style.display = 'block';
+            } else {
+                displayEl.style.display = 'none';
+            }
+        }
+
+        // Form Submission
+        document.getElementById('prediction-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const form = e.target;
+            const formData = new FormData(form);
+            const submitBtn = document.getElementById('submit-btn');
+            const btnSpinner = document.getElementById('btn-spinner');
+            const btnText = document.getElementById('btn-text');
+            const btnIcon = document.getElementById('btn-icon');
+            
+            // Loading State
+            submitBtn.disabled = true;
+            btnSpinner.style.display = 'inline-block';
+            btnIcon.style.display = 'none';
+            btnText.textContent = 'Analyzing Clinical Biomarkers...';
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    sessionStorage.setItem('predictionResult', JSON.stringify(result));
+                    window.location.href = '/result/';
+                } else {
+                    alert('Prediction Error: ' + (result.error || 'Server error occurred.'));
+                    submitBtn.disabled = false;
+                    btnSpinner.style.display = 'none';
+                    btnIcon.style.display = 'inline-block';
+                    btnText.textContent = 'Compute AI Staging Assessment';
+                }
+            } catch (err) {
+                alert('Connection Error: Could not reach the server. Please verify the Django server is running.');
+                submitBtn.disabled = false;
+                btnSpinner.style.display = 'none';
+                btnIcon.style.display = 'inline-block';
+                btnText.textContent = 'Compute AI Staging Assessment';
+            }
+        });
+    </script>
+</body>
+</html>

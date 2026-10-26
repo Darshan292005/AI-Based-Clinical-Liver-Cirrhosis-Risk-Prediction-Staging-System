@@ -1,0 +1,9 @@
+django>=4.0
+numpy
+pandas
+scikit-learn
+xgboost
+joblib
+matplotlib
+seaborn
+imbalanced-learn

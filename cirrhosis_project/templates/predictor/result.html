@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CirrhosisAI | Clinical Assessment Report</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --primary-light: #60a5fa;
+            --primary-subtle: #eff6ff;
+            --bg-page: #f8fafc;
+            --card-bg: #ffffff;
+            --text-heading: #0f172a;
+            --text-body: #334155;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            --shadow-lg: 0 10px 25px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.03);
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-body);
+            line-height: 1.5;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .main-container {
+            max-width: 1100px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Top Nav / Bar */
+        .top-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.75rem;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-icon {
+            background: linear-gradient(135deg, #2563eb, #0284c7);
+            color: white;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.3);
+        }
+
+        .nav-title {
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--text-heading);
+            letter-spacing: -0.02em;
+        }
+
+        .nav-title span {
+            color: var(--primary);
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #ffffff;
+            color: var(--text-body);
+            border: 1.5px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 10px;
+            font-size: 0.88rem;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-back:hover {
+            background: #f1f5f9;
+            color: var(--text-heading);
+            border-color: #cbd5e1;
+            transform: translateY(-1px);
+        }
+
+        /* Stage Stepper Banner */
+        .stepper-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1.75rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .stepper-label {
+            font-size: 0.82rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .stepper-track {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            position: relative;
+        }
+
+        .step-item {
+            background: #f8fafc;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 12px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .step-num {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 2px;
+        }
+
+        .step-title {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--text-body);
+        }
+
+        /* Active highlight states for each stage */
+        .step-item.active-stage-1 {
+            background: #ecfdf5;
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+        }
+        .step-item.active-stage-1 .step-num, .step-item.active-stage-1 .step-title { color: #047857; font-weight: 700; }
+
+        .step-item.active-stage-2 {
+            background: #fffbeb;
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15);
+        }
+        .step-item.active-stage-2 .step-num, .step-item.active-stage-2 .step-title { color: #b45309; font-weight: 700; }
+
+        .step-item.active-stage-3 {
+            background: #fff7ed;
+            border-color: #ea580c;
+            box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
+        }
+        .step-item.active-stage-3 .step-num, .step-item.active-stage-3 .step-title { color: #c2410c; font-weight: 700; }
+
+        .step-item.active-stage-4 {
+            background: #fef2f2;
+            border-color: #dc2626;
+            box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.15);
+        }
+        .step-item.active-stage-4 .step-num, .step-item.active-stage-4 .step-title { color: #991b1b; font-weight: 700; }
+
+        /* Two Column Layout */
+        .report-layout {
+            display: grid;
+            grid-template-columns: 360px 1fr;
+            gap: 1.5rem;
+            align-items: start;
+        }
+
+        /* Left Column Cards */
+        .left-col {
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+        }
+
+        .assessment-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 2rem 1.5rem;
+            text-align: center;
+            box-shadow: var(--shadow-md);
+        }
+
+        .stage-shield {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            margin: 0 auto 1.25rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 4px solid var(--primary);
+            background: #f8fafc;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+            transition: all 0.3s ease;
+        }
+
+        .stage-shield-sub {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+        }
+
+        .stage-shield-num {
+            font-size: 2.8rem;
+            font-weight: 800;
+            line-height: 1;
+            color: var(--text-heading);
+        }
+
+        .risk-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 16px;
+            border-radius: 9999px;
+            font-size: 0.92rem;
+            font-weight: 700;
+            margin-bottom: 1.25rem;
+            border: 1px solid currentColor;
+        }
+
+        .risk-low { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+        .risk-medium { background: #fffbeb; color: #b45309; border-color: #fde68a; }
+        .risk-high { background: #fff7ed; color: #c2410c; border-color: #fed7aa; }
+        .risk-critical { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
+
+        /* Metric Detail Card */
+        .metric-box {
+            background: #f8fafc;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 1.1rem;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+        }
+
+        .metric-item {
+            text-align: center;
+        }
+
+        .metric-item-label {
+            font-size: 0.76rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 2px;
+        }
+
+        .metric-item-val {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--text-heading);
+        }
+
+        .model-tag {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            background: #f1f5f9;
+            padding: 5px 12px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        .btn-restart {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background: var(--text-heading);
+            color: #ffffff;
+            text-decoration: none;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin-top: 1.25rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-restart:hover {
+            background: #1e293b;
+            transform: translateY(-1px);
+        }
+
+        /* Right Column: Recommendations + Chatbot */
+        .right-col {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Clinical Recommendations Card */
+        .recs-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .card-header h3 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--text-heading);
+        }
+
+        .suggestion-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .suggestion-item {
+            background: #f8fafc;
+            border-left: 4px solid var(--primary);
+            padding: 10px 14px;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.9rem;
+            line-height: 1.45;
+            color: var(--text-body);
+        }
+
+        /* Chatbot Card */
+        .chatbot-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-md);
+            display: flex;
+            flex-direction: column;
+            height: 480px;
+        }
+
+        .chatbot-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .chatbot-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .online-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+        }
+
+        .chatbot-meta h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--text-heading);
+        }
+
+        /* Quick Prompt Chips */
+        .prompt-chips {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            margin-bottom: 8px;
+            scrollbar-width: none;
+        }
+
+        .prompt-chip {
+            background: #f1f5f9;
+            color: var(--text-body);
+            border: 1px solid var(--border);
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        .prompt-chip:hover {
+            background: #e0f2fe;
+            color: #0369a1;
+            border-color: #bae6fd;
+        }
+
+        /* Chat Scroll Container */
+        .chat-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            scrollbar-width: thin;
+        }
+
+        .chat-bubble {
+            max-width: 85%;
+            padding: 10px 14px;
+            border-radius: 12px;
+            font-size: 0.88rem;
+            line-height: 1.45;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .bot-bubble {
+            background: #eff6ff;
+            color: #1e3a8a;
+            border-bottom-left-radius: 4px;
+            align-self: flex-start;
+            border-left: 3px solid var(--primary);
+        }
+
+        .user-bubble {
+            background: #2563eb;
+            color: #ffffff;
+            border-bottom-right-radius: 4px;
+            align-self: flex-end;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Chat Input Form */
+        .chat-input-form {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid var(--border);
+        }
+
+        .chat-input {
+            flex: 1;
+            background: #f8fafc;
+            border: 1.5px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 14px;
+            font-size: 0.9rem;
+            color: var(--text-heading);
+            font-family: inherit;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        .chat-input:focus {
+            border-color: var(--primary);
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+        }
+
+        .chat-send-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+
+        .chat-send-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        @media (max-width: 860px) {
+            .report-layout { grid-template-columns: 1fr; }
+            .stepper-track { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        
+        <!-- Navigation Header -->
+        <header class="top-nav">
+            <div class="nav-brand">
+                <div class="brand-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                    </svg>
+                </div>
+                <div>
+                    <h2 class="nav-title">Cirrhosis<span>AI</span> Staging Report</h2>
+                </div>
+            </div>
+            <a href="/" class="btn-back">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+                Start New Assessment
+            </a>
+        </header>
+
+        <!-- 4-Stage Severity Stepper Bar -->
+        <div class="stepper-card">
+            <div class="stepper-label">
+                <span>Clinical Stage Classification Continuum</span>
+                <span id="stepper-status-badge">Diagnosed: Stage -</span>
+            </div>
+            <div class="stepper-track">
+                <div class="step-item" id="step-1">
+                    <div class="step-num">STAGE 1</div>
+                    <div class="step-title">Mild Fibrosis</div>
+                </div>
+                <div class="step-item" id="step-2">
+                    <div class="step-num">STAGE 2</div>
+                    <div class="step-title">Moderate Fibrosis</div>
+                </div>
+                <div class="step-item" id="step-3">
+                    <div class="step-num">STAGE 3</div>
+                    <div class="step-title">Advanced Fibrosis</div>
+                </div>
+                <div class="step-item" id="step-4">
+                    <div class="step-num">STAGE 4</div>
+                    <div class="step-title">Critical Cirrhosis</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Grid Layout -->
+        <div class="report-layout">
+            
+            <!-- Left Column: Primary Diagnosis -->
+            <aside class="left-col">
+                <div class="assessment-card">
+                    <div class="stage-shield" id="stage-shield">
+                        <span class="stage-shield-sub">STAGE</span>
+                        <span class="stage-shield-num" id="result-stage">-</span>
+                    </div>
+
+                    <div class="risk-pill" id="result-risk">
+                        <span id="risk-text">- Risk</span>
+                    </div>
+
+                    <div class="metric-box">
+                        <div class="metric-item">
+                            <div class="metric-item-label">Confidence</div>
+                            <div class="metric-item-val" id="result-confidence">-</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-item-label">Status</div>
+                            <div class="metric-item-val" style="font-size: 1.05rem; color: #059669;">Verified</div>
+                        </div>
+                    </div>
+
+                    <div class="model-tag" id="result-method">
+                        AI Pipeline • Ensemble Model
+                    </div>
+
+                    <a href="/" class="btn-restart">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/>
+                            <path d="M21 3v5h-5"/>
+                            <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/>
+                            <path d="M3 21v-5h5"/>
+                        </svg>
+                        New Patient Evaluation
+                    </a>
+                </div>
+            </aside>
+
+            <!-- Right Column: Clinical Guidance + AI Chatbot -->
+            <main class="right-col">
+                
+                <!-- Clinical Action Items -->
+                <section class="recs-card">
+                    <div class="card-header">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                            <polyline points="10 9 9 9 8 9"/>
+                        </svg>
+                        <h3>Clinical Alerts & Management Recommendations</h3>
+                    </div>
+                    <div class="suggestion-list" id="suggestions-container">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                </section>
+
+                <!-- Medical Assistant Chatbot -->
+                <section class="chatbot-card">
+                    <div class="chatbot-header">
+                        <div class="chatbot-meta">
+                            <div class="online-dot"></div>
+                            <h3>Medical Decision Assistant</h3>
+                        </div>
+                        <span style="font-size: 0.78rem; color: var(--text-muted);">Real-time Guidance</span>
+                    </div>
+
+                    <!-- Quick Prompt Suggestions -->
+                    <div class="prompt-chips">
+                        <button type="button" class="prompt-chip" onclick="sendQuickPrompt('What does this stage mean?')">
+                            💡 Explain Stage
+                        </button>
+                        <button type="button" class="prompt-chip" onclick="sendQuickPrompt('What are the recommended diet and nutrition guidelines?')">
+                            🥗 Diet Advice
+                        </button>
+                        <button type="button" class="prompt-chip" onclick="sendQuickPrompt('Can this condition be reversed or cured?')">
+                            💊 Can it be reversed?
+                        </button>
+                        <button type="button" class="prompt-chip" onclick="sendQuickPrompt('What severe symptoms should I watch out for?')">
+                            ⚠️ Critical Symptoms
+                        </button>
+                    </div>
+
+                    <!-- Chat Message Area -->
+                    <div class="chat-scroll" id="chat-messages">
+                        <!-- Messages injected here -->
+                    </div>
+
+                    <!-- Chat Input -->
+                    <form id="chat-form" class="chat-input-form">
+                        <input type="text" id="chat-input-field" class="chat-input" placeholder="Ask about diet, medications, tests, or symptoms..." autocomplete="off">
+                        <button type="submit" class="chat-send-btn" aria-label="Send message">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="22" y1="2" x2="11" y2="13"/>
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+                            </svg>
+                        </button>
+                    </form>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        let currentStage = '0';
+        let currentRisk = 'Unknown';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const rawData = sessionStorage.getItem('predictionResult');
+            
+            if (!rawData) {
+                window.location.href = '/';
+                return;
+            }
+
+            const result = JSON.parse(rawData);
+            currentStage = String(result.Stage);
+            currentRisk = result.RiskLevel;
+
+            // Update Stage Number
+            document.getElementById('result-stage').textContent = result.Stage;
+            document.getElementById('result-confidence').textContent = result.Confidence;
+            if (result.Method) {
+                document.getElementById('result-method').textContent = result.Method;
+            }
+
+            // Update Risk Pill & Colors
+            const riskPill = document.getElementById('result-risk');
+            const riskText = document.getElementById('risk-text');
+            riskText.textContent = `${result.RiskLevel} Risk`;
+            riskPill.className = `risk-pill risk-${result.RiskLevel.toLowerCase()}`;
+
+            // Highlight in Stepper Bar
+            const stepEl = document.getElementById(`step-${result.Stage}`);
+            if (stepEl) {
+                stepEl.classList.add(`active-stage-${result.Stage}`);
+            }
+            document.getElementById('stepper-status-badge').textContent = `Diagnosed: Stage ${result.Stage} (${result.RiskLevel} Risk)`;
+
+            // Colorize Shield Border
+            const stageColors = {
+                '1': '#10b981',
+                '2': '#f59e0b',
+                '3': '#ea580c',
+                '4': '#dc2626'
+            };
+            const shield = document.getElementById('stage-shield');
+            if (stageColors[result.Stage]) {
+                shield.style.borderColor = stageColors[result.Stage];
+            }
+
+            // Populate Recommendations
+            const suggestionsContainer = document.getElementById('suggestions-container');
+            suggestionsContainer.innerHTML = '';
+            if (result.Suggestions && result.Suggestions.length > 0) {
+                result.Suggestions.forEach(s => {
+                    const item = document.createElement('div');
+                    item.className = 'suggestion-item';
+                    item.textContent = s;
+                    suggestionsContainer.appendChild(item);
+                });
+            } else {
+                const defaultItem = document.createElement('div');
+                defaultItem.className = 'suggestion-item';
+                defaultItem.textContent = "Maintain regular clinical follow-up and hepatic panel monitoring with your physician.";
+                suggestionsContainer.appendChild(defaultItem);
+            }
+
+            // Initial Chatbot Welcome
+            const chatMessages = document.getElementById('chat-messages');
+            const welcomeBubble = document.createElement('div');
+            welcomeBubble.className = 'chat-bubble bot-bubble';
+            welcomeBubble.textContent = `Hello! I am your AI clinical assistant. Based on this patient's Stage ${result.Stage} (${result.RiskLevel} Risk) assessment, feel free to ask questions about diet, medications, symptoms, or staging.`;
+            chatMessages.appendChild(welcomeBubble);
+        });
+
+        function sendQuickPrompt(promptText) {
+            document.getElementById('chat-input-field').value = promptText;
+            document.getElementById('chat-form').dispatchEvent(new Event('submit'));
+        }
+
+        // Chatbot Form Submission
+        document.getElementById('chat-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const inputField = document.getElementById('chat-input-field');
+            const message = inputField.value.trim();
+            if (!message) return;
+
+            const chatMessages = document.getElementById('chat-messages');
+
+            // Append User Bubble
+            const userBubble = document.createElement('div');
+            userBubble.className = 'chat-bubble user-bubble';
+            userBubble.textContent = message;
+            chatMessages.appendChild(userBubble);
+            inputField.value = '';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            try {
+                const res = await fetch('/chat/ask_chatbot', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        message: message,
+                        stage: currentStage,
+                        risk: currentRisk
+                    })
+                });
+
+                const chatResult = await res.json();
+                const botBubble = document.createElement('div');
+                botBubble.className = 'chat-bubble bot-bubble';
+
+                if (res.ok && chatResult.reply) {
+                    botBubble.textContent = chatResult.reply;
+                } else {
+                    botBubble.style.borderLeftColor = '#ef4444';
+                    botBubble.textContent = "Sorry, I could not process that request. Please try rephrasing your question.";
+                }
+
+                chatMessages.appendChild(botBubble);
+            } catch (err) {
+                const errBubble = document.createElement('div');
+                errBubble.className = 'chat-bubble bot-bubble';
+                errBubble.style.borderLeftColor = '#ef4444';
+                errBubble.textContent = "Network error communicating with medical assistant.";
+                chatMessages.appendChild(errBubble);
+            }
+
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        });
+    </script>
+</body>
+</html>

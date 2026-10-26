@@ -1,0 +1,16 @@
+python-interpreter-path = "venv/Scripts/python.exe"
+search-path = [
+    ".",
+]
+site-package-path = [
+    "venv/Lib/site-packages",
+]
+project-excludes = [
+    "**/venv/**",
+    "**/.venv/**",
+    "**/__pycache__/**",
+]
+
+[errors]
+missing-import = false
+
